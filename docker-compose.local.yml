@@ -1,0 +1,44 @@
+version: '3.8'
+
+volumes:
+  gab_turism_local_postgres_data: {}
+  gab_turism_local_postgres_data_backups: {}
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: gab_turism_local_django
+    container_name: gab_turism_local_django
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - '8000:8000'
+    command: /start
+
+  postgres:
+    image: postgres:16
+    container_name: gab_turism_local_postgres
+    volumes:
+      - gab_turism_local_postgres_data:/var/lib/postgresql/data
+      - gab_turism_local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+
+  nextjs:
+    build:
+      context: ./gab_turism_frontend
+      dockerfile: Dockerfile
+    container_name: gab_turism_local_nextjs
+    volumes:
+      - ./gab_turism_frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
