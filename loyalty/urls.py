@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import LoyaltyProgramViewSet, UserViewSet
+from .views import LoyaltyProgramViewSet
+from gab_turism.users.api.views import UserViewSet  # Importando UserViewSet corretamente
 from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()

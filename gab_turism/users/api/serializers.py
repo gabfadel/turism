@@ -1,13 +1,27 @@
 from rest_framework import serializers
+from loyalty.models import LoyaltyProgram
+from django.contrib.auth import get_user_model
 
-from gab_turism.users.models import User
+User = get_user_model()
 
+class LoyaltyProgramSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoyaltyProgram
+        fields = ['id', 'title', 'image_url', 'cost']
 
-class UserSerializer(serializers.ModelSerializer[User]):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["username", "name", "url"]
-
+        fields = ['id', 'username', 'email', 'password', 'loyalty_points']
         extra_kwargs = {
-            "url": {"view_name": "api:user-detail", "lookup_field": "username"},
+            'password': {'write_only': True},
+            'loyalty_points': {'read_only': True}
         }
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email'),
+            password=validated_data['password']
+        )
+        return user
